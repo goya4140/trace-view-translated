@@ -16,6 +16,7 @@
 | **Providers** | Claude Code(`~/.claude/projects`)、Codex CLI(`~/.codex/sessions`,支持 v0/v1/0.148 三代格式)、OpenCode(`~/.local/share/opencode/storage`,session/message/part 三层存储自动聚合)、pi(`~/.pi/agent/sessions`)、通用 `.jsonl`/`.ndjson` 手动导入 |
 | **Session Library** | 自动扫描本地会话,provider 过滤、搜索、按日期分组、live 会话标记 |
 | **Trajectory** | 虚拟滚动的完整轨迹:user/assistant/reasoning/tool call+result/system/error/compaction/unknown,连续工具调用自动聚合,可展开 |
+| **语义反编译（实验版）** | 默认按用户轮次把多条调用合成为查找、分析、判断、写入、检查等任务阶段，列出文件产物、失败尝试和证据事件 ID；完全本地、无需模型。规则与局限见 [设计说明](docs/semantic-decompiler.md)。 |
 | **自然语言翻译** | 在「原始轨迹 / 自然语言翻译」间切换；按用户提问分轮，用中文解释模型请求、工具动作与结果、上下文变化和 Token 用量记录。点击步骤可在 Inspector 核对原始 JSON。翻译由本地规则生成，不调用外部模型；未知事件会明确标出。 |
 | **Request Boundaries** | 每个 model request 一条分隔线(带模型名与耗时)——看清一个 run 到底拆了多少次真实请求 |
 | **Synthetic 识别** | `(continuing)`、compact-summary、isMeta、injected 等 harness 合成消息全部标出,方便研究 harness 行为 |
@@ -33,7 +34,7 @@
 
 **macOS(Apple Silicon)**:从 [Releases](https://github.com/goya4140/trace-view-translated/releases) 下载 `Trace-Review-Translated-<ver>-arm64.dmg`,拖入 Applications 即可。双击打开的是**原生应用窗口**(无需浏览器),自包含 Node 运行时,不装任何依赖。应用运行期间想切回浏览器:`File → Open in Browser`(⌘B),或直接访问 `http://127.0.0.1:7861` — 两边连的是同一个本地 server。
 
-选择左侧会话后默认进入「自然语言翻译」；需要逐条查看原始事件时，点击时间线下方的「原始轨迹」。
+选择左侧会话后默认进入「语义反编译」；时间线下方可切换到「自然语言翻译」或「原始轨迹」。
 
 首次打开若被 Gatekeeper 拦截(未签名),右键 → 打开,或:
 
@@ -76,7 +77,7 @@ npm run dev        # vite(5173,代理 /api)+ tsx watch
 测试与检查:
 
 ```bash
-npm test           # 48 个测试(parsers / run-builder / 翻译 / UI 渲染 / live tail)
+npm test           # 50 个测试(parsers / run-builder / 翻译 / 语义反编译 / UI 渲染 / live tail)
 npm run typecheck  # server + web 双 tsconfig
 npx tsx scripts/e2e-check.ts  # 真实浏览器 e2e(需 Chrome)
 node scripts/bench-parse.ts    # 用本机最大的真实 trace 跑解析基准

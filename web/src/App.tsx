@@ -7,6 +7,7 @@ import { Timeline } from './components/Timeline.js';
 import { FilterBar, type FilterState } from './components/FilterBar.js';
 import { Trajectory } from './components/Trajectory.js';
 import { TranslationView } from './components/TranslationView.js';
+import { SemanticView } from './components/SemanticView.js';
 import { Inspector } from './components/Inspector.js';
 import { FilesPanel } from './components/FilesPanel.js';
 import { fmtBytes } from './format.js';
@@ -32,7 +33,7 @@ export function App(): JSX.Element {
   const [searching, setSearching] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [filesOpen, setFilesOpen] = useState(false);
-  const [readingMode, setReadingMode] = useState<'trace' | 'translation'>('translation');
+  const [readingMode, setReadingMode] = useState<'trace' | 'translation' | 'semantic'>('semantic');
   const loadRunRef = useRef(0);
 
   // --- library ---
@@ -324,10 +325,11 @@ export function App(): JSX.Element {
             />
             <Timeline spans={spans} onSelect={jumpToEvent} />
             <div className="reading-mode-bar" role="group" aria-label="阅读模式">
+              <button className={readingMode === 'semantic' ? 'active' : ''} onClick={() => setReadingMode('semantic')}>语义反编译</button>
               <button className={readingMode === 'translation' ? 'active' : ''} onClick={() => setReadingMode('translation')}>自然语言翻译</button>
               <button className={readingMode === 'trace' ? 'active' : ''} onClick={() => setReadingMode('trace')}>原始轨迹</button>
             </div>
-            <FilterBar
+            {readingMode !== 'semantic' && <FilterBar
               filters={filters}
               onToggle={onToggleFilter}
               search={search}
@@ -337,12 +339,15 @@ export function App(): JSX.Element {
               searching={searching}
               total={events.length}
               shown={patchedEvents.length}
-            />
+            />}
             {readingMode === 'trace' ? (
               <Trajectory events={patchedEvents} selectedEventId={selectedEventId} onSelect={onSelectEvent}
                 autoScrollSeq={autoScrollSeq} live={run.live} />
-            ) : (
+            ) : readingMode === 'translation' ? (
               <TranslationView events={patchedEvents} selectedEventId={selectedEventId} onSelect={onSelectEvent}
+                autoScrollSeq={autoScrollSeq} />
+            ) : (
+              <SemanticView events={events} selectedEventId={selectedEventId} onSelect={onSelectEvent}
                 autoScrollSeq={autoScrollSeq} />
             )}
           </>

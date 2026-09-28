@@ -32,9 +32,9 @@ async function main(): Promise<void> {
     failed = !check('library renders', true, `${await page.$$eval('.session-item', (e) => e.length)} sessions`) || failed;
 
     await page.click('.session-item');
-    await page.waitForSelector('.translation-turn', { timeout: 30000 });
-    const translatedByDefault = await page.$eval('.reading-mode-bar button.active', (button) => button.textContent?.trim() === '自然语言翻译');
-    failed = !check('natural language translation opens by default', translatedByDefault) || failed;
+    await page.waitForSelector('.semantic-turn', { timeout: 30000 });
+    const decompiledByDefault = await page.$eval('.reading-mode-bar button.active', (button) => button.textContent?.trim() === '语义反编译');
+    failed = !check('semantic decompiler opens by default', decompiledByDefault) || failed;
     await page.evaluate(() => {
       const raw = [...document.querySelectorAll<HTMLButtonElement>('.reading-mode-bar button')]
         .find((button) => button.textContent?.trim() === '原始轨迹');

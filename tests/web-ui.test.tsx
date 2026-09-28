@@ -145,8 +145,13 @@ describe('web UI (jsdom render)', () => {
     });
     await waitFor(() => container.querySelector('.run-title') !== null);
     expect(container.querySelector('.run-title')!.textContent).toBe('Login bug fix session');
-    expect(container.querySelector('.reading-mode-bar button.active')?.textContent).toBe('自然语言翻译');
-    expect(container.querySelector('.translation-turn')).toBeTruthy();
+    expect(container.querySelector('.reading-mode-bar button.active')?.textContent).toBe('语义反编译');
+    expect(container.querySelector('.semantic-turn')).toBeTruthy();
+    const evidence = container.querySelector('.semantic-phase .semantic-evidence summary') as HTMLElement;
+    await act(async () => { evidence.click(); });
+    const source = container.querySelector('.semantic-phase .semantic-evidence-list button') as HTMLButtonElement;
+    await act(async () => { source.click(); });
+    expect(container.querySelector('.inspector')!.textContent).toContain(source.textContent);
     const rawMode = [...container.querySelectorAll('.reading-mode-bar button')]
       .find((button) => button.textContent === '原始轨迹') as HTMLButtonElement;
     await act(async () => { rawMode.click(); });
