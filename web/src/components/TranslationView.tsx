@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { TraceEvent } from '../types.js';
 import { buildTranslation, type TranslationStep, type TranslationTurn } from '../translation.js';
@@ -63,6 +63,9 @@ function TurnCard({ turn, selectedEventId, onSelect }: {
   selectedEventId: string | null;
   onSelect: (eventId: string) => void;
 }): JSX.Element {
+  const [promptExpanded, setPromptExpanded] = useState(false);
+  const longPrompt = (turn.prompt?.length ?? 0) > 360;
+  const visiblePrompt = longPrompt && !promptExpanded ? `${turn.prompt!.slice(0, 360).trimEnd()}…` : turn.prompt;
   return (
     <section className="translation-turn">
       <div className="translation-turn-heading">{turn.number ? `第 ${turn.number} 轮 · 你的提问` : '会话开始前的记录'}</div>
@@ -70,7 +73,11 @@ function TurnCard({ turn, selectedEventId, onSelect }: {
         role="button" tabIndex={0} data-event-id={turn.promptEventId}
         onClick={() => turn.promptEventId && onSelect(turn.promptEventId)}
         onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ') && turn.promptEventId) onSelect(turn.promptEventId); }}>
-        <SafeMarkdown text={turn.prompt} />
+        <SafeMarkdown text={visiblePrompt ?? ''} />
+        {longPrompt && <button className="translation-expand" onClick={(event) => {
+          event.stopPropagation();
+          setPromptExpanded((expanded) => !expanded);
+        }}>{promptExpanded ? '收起提问' : '展开完整提问'}</button>}
       </div>}
       <div className="translation-steps">
         {turn.steps.map((step) => <Step key={step.id} step={step} selectedEventId={selectedEventId} onSelect={onSelect} />)}

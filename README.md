@@ -33,6 +33,8 @@
 
 **macOS(Apple Silicon)**:从 [Releases](https://github.com/goya4140/trace-view-translated/releases) 下载 `Trace-Review-Translated-<ver>-arm64.dmg`,拖入 Applications 即可。双击打开的是**原生应用窗口**(无需浏览器),自包含 Node 运行时,不装任何依赖。应用运行期间想切回浏览器:`File → Open in Browser`(⌘B),或直接访问 `http://127.0.0.1:7861` — 两边连的是同一个本地 server。
 
+选择左侧会话后默认进入「自然语言翻译」；需要逐条查看原始事件时，点击时间线下方的「原始轨迹」。
+
 首次打开若被 Gatekeeper 拦截(未签名),右键 → 打开,或:
 
 ```bash
@@ -74,7 +76,7 @@ npm run dev        # vite(5173,代理 /api)+ tsx watch
 测试与检查:
 
 ```bash
-npm test           # 47 个测试(parsers / run-builder / 翻译 / UI 渲染 / live tail)
+npm test           # 48 个测试(parsers / run-builder / 翻译 / UI 渲染 / live tail)
 npm run typecheck  # server + web 双 tsconfig
 npx tsx scripts/e2e-check.ts  # 真实浏览器 e2e(需 Chrome)
 node scripts/bench-parse.ts    # 用本机最大的真实 trace 跑解析基准

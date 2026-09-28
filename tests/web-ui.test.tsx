@@ -145,6 +145,11 @@ describe('web UI (jsdom render)', () => {
     });
     await waitFor(() => container.querySelector('.run-title') !== null);
     expect(container.querySelector('.run-title')!.textContent).toBe('Login bug fix session');
+    expect(container.querySelector('.reading-mode-bar button.active')?.textContent).toBe('自然语言翻译');
+    expect(container.querySelector('.translation-turn')).toBeTruthy();
+    const rawMode = [...container.querySelectorAll('.reading-mode-bar button')]
+      .find((button) => button.textContent === '原始轨迹') as HTMLButtonElement;
+    await act(async () => { rawMode.click(); });
     // Trajectory rows render in the visible virtual window.
     await waitFor(() => container.querySelectorAll('.tool-row').length >= 1);
     const text = container.textContent!;

@@ -24,6 +24,17 @@ const preview = (value: string, limit = 240): string => {
   return compact.length > limit ? `${compact.slice(0, limit)}…` : compact;
 };
 
+function userPrompt(text: string): { prompt?: string; context?: string } {
+  if (/^# AGENTS\.md instructions\b/.test(text.trim())) {
+    return { context: '已加载 AGENTS.md 工作规则。这里是会话背景，不是本轮提问。' };
+  }
+  const match = /^## My request:\s*/m.exec(text);
+  if (!match) return { prompt: text };
+  const request = text.slice(match.index + match[0].length)
+    .split(/\n\s*<image\b|\n\s*\[Image #/i)[0].trim();
+  return { prompt: request || text };
+}
+
 function argument(input: unknown, keys: string[]): string | undefined {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return undefined;
   const obj = input as Record<string, unknown>;
@@ -125,8 +136,14 @@ export function buildTranslation(events: TraceEvent[]): TranslationTurn[] {
       continue;
     }
     if (event.kind === 'user_message') {
+      const parsed = userPrompt(event.text);
+      if (parsed.context) {
+        add({ id: event.id, eventIds: [event.id], kind: 'context',
+          title: '加载了工作区说明', detail: parsed.context });
+        continue;
+      }
       turn = { id: event.id, number: ++userTurnNumber,
-        prompt: event.text, promptEventId: event.id, steps: [], eventIds: [event.id] };
+        prompt: parsed.prompt, promptEventId: event.id, steps: [], eventIds: [event.id] };
       turns.push(turn);
       if (pendingBoundary) {
         add({ id: pendingBoundary.id, eventIds: [pendingBoundary.id], kind: 'request',
@@ -184,6 +201,15 @@ export function buildTranslation(events: TraceEvent[]): TranslationTurn[] {
         if (event.rawType === 'token_usage_record') {
           add({ id: event.id, eventIds: [event.id], kind: 'usage', title: '记录了一次 Token 用量快照',
             detail: '这是统计记录，不是助手的新回复。点开可查看原始用量数据。' });
+        } else if (/^message:(developer|system)$/.test(event.rawType ?? '')) {
+          const last = ensureTurn().steps.at(-1);
+          if (last?.title === '加载了运行规则') {
+            last.eventIds.push(event.id);
+            ensureTurn().eventIds.push(event.id);
+          } else {
+            add({ id: event.id, eventIds: [event.id], kind: 'context', title: '加载了运行规则',
+              detail: '这段内容用于指导助手工作，点开可核对原始记录。' });
+          }
         } else {
           add({ id: event.id, eventIds: [event.id], kind: 'context', title: '尚未识别的记录',
             detail: `${event.rawType ?? event.source.rawType ?? '未知类型'}：点开查看原始数据。` });

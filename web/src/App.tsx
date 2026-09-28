@@ -32,7 +32,7 @@ export function App(): JSX.Element {
   const [searching, setSearching] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [filesOpen, setFilesOpen] = useState(false);
-  const [readingMode, setReadingMode] = useState<'trace' | 'translation'>('trace');
+  const [readingMode, setReadingMode] = useState<'trace' | 'translation'>('translation');
   const loadRunRef = useRef(0);
 
   // --- library ---
@@ -324,8 +324,8 @@ export function App(): JSX.Element {
             />
             <Timeline spans={spans} onSelect={jumpToEvent} />
             <div className="reading-mode-bar" role="group" aria-label="阅读模式">
-              <button className={readingMode === 'trace' ? 'active' : ''} onClick={() => setReadingMode('trace')}>原始轨迹</button>
               <button className={readingMode === 'translation' ? 'active' : ''} onClick={() => setReadingMode('translation')}>自然语言翻译</button>
+              <button className={readingMode === 'trace' ? 'active' : ''} onClick={() => setReadingMode('trace')}>原始轨迹</button>
             </div>
             <FilterBar
               filters={filters}

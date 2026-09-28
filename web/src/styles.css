@@ -751,6 +751,13 @@ input::placeholder {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.translation-expand {
+  display: block;
+  margin-top: 7px;
+  color: #a9c7ff;
+  font-size: 11px;
+  text-decoration: underline;
+}
 .translation-steps { padding: 0 12px 10px; }
 .translation-step {
   display: flex;

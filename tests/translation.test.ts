@@ -10,6 +10,20 @@ import type { TraceEvent } from '../src/core/schema.js';
 const fixture = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/codex-basic.jsonl');
 
 describe('natural language translation', () => {
+  it('treats workspace instructions as context and extracts the actual request', () => {
+    const base = { timestamp: '2026-09-28T00:00:00Z', agentId: 'main', source: { provider: 'codex' as const } };
+    const events: TraceEvent[] = [
+      { ...base, id: 'e0', seq: 0, kind: 'user_message', text: '# AGENTS.md instructions\n<INSTRUCTIONS>…</INSTRUCTIONS>' },
+      { ...base, id: 'e1', seq: 1, kind: 'unknown', rawType: 'message:developer' },
+      { ...base, id: 'e2', seq: 2, kind: 'user_message', text: '# Files mentioned by the user:\n## picture.png\n## My request:\nPlease explain the trace.\n<image name="x">' },
+    ];
+    const turns = buildTranslation(events);
+    expect(turns).toHaveLength(2);
+    expect(turns[0].steps.map((step) => step.title)).toEqual(['加载了工作区说明', '加载了运行规则']);
+    expect(turns[1].number).toBe(1);
+    expect(turns[1].prompt).toBe('Please explain the trace.');
+  });
+
   it('groups model requests and paired tools under the user turn while retaining source ids', () => {
     const adapter = new CodexAdapter();
     const state = adapter.createState();
