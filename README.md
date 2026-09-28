@@ -1,4 +1,6 @@
-# Trace Review
+# Trace Review Translated
+
+基于 [Picrew/trace_view](https://github.com/Picrew/trace_view) 的个人扩展版本；保留原始轨迹查看能力，增加适合初学者的中文自然语言阅读模式。
 
 **Local-first Agent Trace Review** — 一个用来查看、搜索、调试和 review Coding Agent 完整运行轨迹的开发者工具。
 
@@ -10,10 +12,11 @@
 
 | | |
 |---|---|
-| **Native App** | macOS 原生应用窗口(AppKit + WKWebView):双击即用,有 Dock 图标和菜单栏;同一 server 期间任意浏览器访问 `127.0.0.1:7860` 亦可,两边共存 |
+| **Native App** | macOS 原生应用窗口(AppKit + WKWebView):双击即用,有 Dock 图标和菜单栏;DMG 版本同时可通过浏览器访问 `127.0.0.1:7861` |
 | **Providers** | Claude Code(`~/.claude/projects`)、Codex CLI(`~/.codex/sessions`,支持 v0/v1/0.148 三代格式)、OpenCode(`~/.local/share/opencode/storage`,session/message/part 三层存储自动聚合)、pi(`~/.pi/agent/sessions`)、通用 `.jsonl`/`.ndjson` 手动导入 |
 | **Session Library** | 自动扫描本地会话,provider 过滤、搜索、按日期分组、live 会话标记 |
 | **Trajectory** | 虚拟滚动的完整轨迹:user/assistant/reasoning/tool call+result/system/error/compaction/unknown,连续工具调用自动聚合,可展开 |
+| **自然语言翻译** | 在「原始轨迹 / 自然语言翻译」间切换；按用户提问分轮，用中文解释模型请求、工具动作与结果、上下文变化和 Token 用量记录。点击步骤可在 Inspector 核对原始 JSON。翻译由本地规则生成，不调用外部模型；未知事件会明确标出。 |
 | **Request Boundaries** | 每个 model request 一条分隔线(带模型名与耗时)——看清一个 run 到底拆了多少次真实请求 |
 | **Synthetic 识别** | `(continuing)`、compact-summary、isMeta、injected 等 harness 合成消息全部标出,方便研究 harness 行为 |
 | **Timeline** | Canvas 多 track 时间线(Model / Bash / Read / Edit / MCP…),zoom / pan / hover tooltip / 点击跳转事件 |
@@ -28,12 +31,12 @@
 
 ## 快速开始
 
-**macOS(Apple Silicon)**:从 [Releases](https://github.com/Picrew/trace_view/releases) 下载 `Trace-Review-<ver>-arm64.dmg`,拖入 Applications 即可。双击打开的是**原生应用窗口**(无需浏览器),自包含 Node 运行时,不装任何依赖。应用运行期间想切回浏览器:`File → Open in Browser`(⌘B),或直接访问 `http://127.0.0.1:7860` — 两边连的是同一个本地 server。
+**macOS(Apple Silicon)**:从 [Releases](https://github.com/goya4140/trace-view-translated/releases) 下载 `Trace-Review-Translated-<ver>-arm64.dmg`,拖入 Applications 即可。双击打开的是**原生应用窗口**(无需浏览器),自包含 Node 运行时,不装任何依赖。应用运行期间想切回浏览器:`File → Open in Browser`(⌘B),或直接访问 `http://127.0.0.1:7861` — 两边连的是同一个本地 server。
 
 首次打开若被 Gatekeeper 拦截(未签名),右键 → 打开,或:
 
 ```bash
-xattr -d com.apple.quarantine "/Applications/Trace Review.app"
+xattr -d com.apple.quarantine "/Applications/Trace Review Translated.app"
 ```
 
 **从源码运行**(网页模式):
@@ -41,7 +44,7 @@ xattr -d com.apple.quarantine "/Applications/Trace Review.app"
 ```bash
 npm install
 npm run build
-npm start          # 启动并自动打开浏览器(127.0.0.1:7860)
+npm start          # 从源码启动网页模式(127.0.0.1:7860)
 ```
 
 或直接:
@@ -71,7 +74,7 @@ npm run dev        # vite(5173,代理 /api)+ tsx watch
 测试与检查:
 
 ```bash
-npm test           # 33 个测试(parsers / run-builder / API / UI 渲染 / live tail)
+npm test           # 47 个测试(parsers / run-builder / 翻译 / UI 渲染 / live tail)
 npm run typecheck  # server + web 双 tsconfig
 npx tsx scripts/e2e-check.ts  # 真实浏览器 e2e(需 Chrome)
 node scripts/bench-parse.ts    # 用本机最大的真实 trace 跑解析基准

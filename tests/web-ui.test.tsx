@@ -180,6 +180,25 @@ describe('web UI (jsdom render)', () => {
     expect(aggregateRows).toHaveLength(0); // only 3 consecutive tools — below threshold
   });
 
+  it('switches to natural language turns and opens the source event', async () => {
+    const mode = [...container.querySelectorAll('.reading-mode-bar button')]
+      .find((button) => button.textContent === '自然语言翻译') as HTMLButtonElement;
+    await act(async () => { mode.click(); });
+    await waitFor(() => container.querySelector('.translation-turn') !== null);
+    expect(container.textContent).toContain('第 1 轮 · 你的提问');
+    expect(container.textContent).toContain('运行命令');
+    const step = container.querySelector('.translation-tool') as HTMLButtonElement;
+    await act(async () => { step.click(); });
+    await waitFor(() => container.querySelector('.inspector') !== null);
+    expect(container.querySelector('.inspector')!.textContent).toContain('tool_call');
+    const result = step.querySelector('.translation-source-link') as HTMLButtonElement;
+    await act(async () => { result.click(); });
+    expect(container.querySelector('.inspector')!.textContent).toContain('tool_result');
+    const trace = [...container.querySelectorAll('.reading-mode-bar button')]
+      .find((button) => button.textContent === '原始轨迹') as HTMLButtonElement;
+    await act(async () => { trace.click(); });
+  });
+
   it('filters events when chips are toggled', async () => {
     const chip = [...container.querySelectorAll('.filter-chip')].find((c) => c.textContent === 'User') as HTMLButtonElement;
     await act(async () => {

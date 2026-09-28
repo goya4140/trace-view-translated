@@ -6,6 +6,7 @@ import { RunHeader } from './components/RunHeader.js';
 import { Timeline } from './components/Timeline.js';
 import { FilterBar, type FilterState } from './components/FilterBar.js';
 import { Trajectory } from './components/Trajectory.js';
+import { TranslationView } from './components/TranslationView.js';
 import { Inspector } from './components/Inspector.js';
 import { FilesPanel } from './components/FilesPanel.js';
 import { fmtBytes } from './format.js';
@@ -31,6 +32,7 @@ export function App(): JSX.Element {
   const [searching, setSearching] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [filesOpen, setFilesOpen] = useState(false);
+  const [readingMode, setReadingMode] = useState<'trace' | 'translation'>('trace');
   const loadRunRef = useRef(0);
 
   // --- library ---
@@ -321,6 +323,10 @@ export function App(): JSX.Element {
               filesOpen={filesOpen}
             />
             <Timeline spans={spans} onSelect={jumpToEvent} />
+            <div className="reading-mode-bar" role="group" aria-label="阅读模式">
+              <button className={readingMode === 'trace' ? 'active' : ''} onClick={() => setReadingMode('trace')}>原始轨迹</button>
+              <button className={readingMode === 'translation' ? 'active' : ''} onClick={() => setReadingMode('translation')}>自然语言翻译</button>
+            </div>
             <FilterBar
               filters={filters}
               onToggle={onToggleFilter}
@@ -332,13 +338,13 @@ export function App(): JSX.Element {
               total={events.length}
               shown={patchedEvents.length}
             />
-            <Trajectory
-              events={patchedEvents}
-              selectedEventId={selectedEventId}
-              onSelect={onSelectEvent}
-              autoScrollSeq={autoScrollSeq}
-              live={run.live}
-            />
+            {readingMode === 'trace' ? (
+              <Trajectory events={patchedEvents} selectedEventId={selectedEventId} onSelect={onSelectEvent}
+                autoScrollSeq={autoScrollSeq} live={run.live} />
+            ) : (
+              <TranslationView events={patchedEvents} selectedEventId={selectedEventId} onSelect={onSelectEvent}
+                autoScrollSeq={autoScrollSeq} />
+            )}
           </>
         )}
       </main>

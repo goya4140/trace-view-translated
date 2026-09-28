@@ -1,10 +1,10 @@
 //
 //  main.swift
-//  Trace Review — native macOS shell
+//  Trace Review Translated — native macOS shell
 //
 //  A thin AppKit + WKWebView window around the trace-review server (bundled
 //  as a self-contained Node SEA binary at Contents/Resources/trace-review).
-//  The server still binds 127.0.0.1:7860, so the same UI stays reachable
+//  The server binds 127.0.0.1:7861, so the same UI stays reachable
 //  from any browser while the app runs (File → Open in Browser).
 //
 //  Built by scripts/package-macos.sh:
@@ -19,7 +19,7 @@ import AppKit
 
 // MARK: - Constants
 
-private let kPort: UInt16 = 7860
+private let kPort: UInt16 = 7861
 private let kBaseURL = URL(string: "http://127.0.0.1:\(kPort)")!
 private let kHealthURL = URL(string: "http://127.0.0.1:\(kPort)/api/health")!
 private let kHealthPollInterval: TimeInterval = 0.25
@@ -176,7 +176,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         alert.messageText = "Local server stopped"
         alert.informativeText = """
             The trace-review server exited (status \(exited.terminationStatus)).
-            Log: ~/Library/Logs/Trace Review/server.log
+            Log: ~/Library/Logs/Trace Review Translated/server.log
 
             Restart the server, or quit the app?
             """
@@ -218,7 +218,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             \(reason)
 
             Port \(kPort) may be in use by another program, or the server hit an error.
-            Log: ~/Library/Logs/Trace Review/server.log
+            Log: ~/Library/Logs/Trace Review Translated/server.log
             """
         alert.addButton(withTitle: "Retry")
         alert.addButton(withTitle: "Quit")
@@ -260,7 +260,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func openServerLog() -> FileHandle? {
         let fm = FileManager.default
         guard let logs = fm.urls(for: .libraryDirectory, in: .userDomainMask).first else { return nil }
-        let dir = logs.appendingPathComponent("Logs/Trace Review", isDirectory: true)
+        let dir = logs.appendingPathComponent("Logs/Trace Review Translated", isDirectory: true)
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
         let file = dir.appendingPathComponent("server.log")
         if !fm.fileExists(atPath: file.path) {
@@ -361,7 +361,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let w = NSWindow(contentRect: content.frame,
                          styleMask: [.titled, .closable, .miniaturizable, .resizable],
                          backing: .buffered, defer: false)
-        w.title = "Trace Review"
+        w.title = "Trace Review Translated"
         w.minSize = NSSize(width: 960, height: 600)
         if !w.setFrameUsingName("TraceReviewMainWindow") { w.center() }
         _ = w.setFrameAutosaveName("TraceReviewMainWindow")
@@ -378,10 +378,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let appItem = NSMenuItem()
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "About Trace Review",
+        appMenu.addItem(withTitle: "About Trace Review Translated",
                         action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Hide Trace Review",
+        appMenu.addItem(withTitle: "Hide Trace Review Translated",
                         action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         let hideOthers = NSMenuItem(title: "Hide Others",
                                     action: #selector(NSApplication.hideOtherApplications(_:)), keyEquivalent: "h")
@@ -390,7 +390,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appMenu.addItem(withTitle: "Show All",
                         action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: "")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Quit Trace Review",
+        appMenu.addItem(withTitle: "Quit Trace Review Translated",
                         action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
         main.addItem(appItem)

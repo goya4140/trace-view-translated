@@ -172,6 +172,23 @@ export class CodexAdapter implements TraceAdapter<CodexState> {
         break;
       }
 
+      case 'token_usage_record': {
+        const usage = p.turn_token_usage ?? p.usage;
+        const input = usage && typeof usage === 'object' ? num(usage.input_tokens) : 0;
+        const output = usage && typeof usage === 'object' ? num(usage.output_tokens) : 0;
+        const total = usage && typeof usage === 'object' ? num(usage.total_tokens) : 0;
+        const parts = [input && `输入 ${input}`, output && `输出 ${output}`, total && `合计 ${total}`].filter(Boolean);
+        events.push(mkEvent({
+          kind: 'system',
+          subtype: 'token_usage_record',
+          text: parts.length ? `Token 用量：${parts.join('，')}` : '记录了一次 Token 用量快照',
+          level: 'info',
+          source: { provider, rawType: 'token_usage_record' },
+          ...this.requestCtx(state),
+        }) as SystemEvent);
+        break;
+      }
+
       case 'state': {
         // v0 bookkeeping line.
         state.meta.skippedTypes['state'] = (state.meta.skippedTypes['state'] ?? 0) + 1;

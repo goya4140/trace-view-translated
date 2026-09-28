@@ -1,12 +1,12 @@
 #!/bin/bash
-# Package Trace Review as a self-contained macOS .app and .dmg.
+# Package Trace Review Translated as a self-contained macOS .app and .dmg.
 #
 # Pipeline: tsc+vite build → esbuild single CJS bundle → Node SEA
 # (single-executable, no Node required at runtime) → swiftc native window
-# shell → Trace Review.app (shell + server sidecar) → DMG.
+# shell → Trace Review Translated.app (shell + server sidecar) → DMG.
 #
 # The .app opens a native AppKit window (WKWebView) that runs the bundled
-# server as a child process; the server still binds 127.0.0.1:7860, so any
+# server as a child process; the packaged app binds 127.0.0.1:7861, so any
 # browser can open the same UI while the app runs.
 #
 # Usage: bash scripts/package-macos.sh
@@ -24,10 +24,10 @@ if [ "$SRC_VERSION" != "$VERSION" ]; then
   exit 1
 fi
 OUT_DIR="dist-packages"
-APP_NAME="Trace Review"
-DMG="$OUT_DIR/Trace-Review-$VERSION-$ARCH.dmg"
+APP_NAME="Trace Review Translated"
+DMG="$OUT_DIR/Trace-Review-Translated-$VERSION-$ARCH.dmg"
 
-echo "▶ Packaging Trace Review $VERSION ($ARCH)"
+echo "▶ Packaging $APP_NAME $VERSION ($ARCH)"
 
 # ── 0. Clean ──────────────────────────────────────────────────────────────
 rm -rf build/sea build/bundle build/app build/dmg-root "$OUT_DIR"
@@ -131,7 +131,7 @@ echo "▶ [5/7] compiling native shell (swiftc)"
 mkdir -p build/app-shell
 swiftc -O -o build/app-shell/TraceReview src/shell/main.swift
 
-# ── 6. Assemble Trace Review.app ──────────────────────────────────────────
+# ── 6. Assemble Trace Review Translated.app ───────────────────────────────
 echo "▶ [6/7] assembling $APP_NAME.app"
 APP="build/app/$APP_NAME.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
@@ -148,9 +148,9 @@ cat > "$APP/Contents/Info.plist" <<EOF
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>Trace Review</string>
-  <key>CFBundleDisplayName</key><string>Trace Review</string>
-  <key>CFBundleIdentifier</key><string>com.picrew.trace-review</string>
+  <key>CFBundleName</key><string>Trace Review Translated</string>
+  <key>CFBundleDisplayName</key><string>Trace Review Translated</string>
+  <key>CFBundleIdentifier</key><string>com.goya4140.trace-review-translated</string>
   <key>CFBundleVersion</key><string>$VERSION</string>
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleExecutable</key><string>TraceReview</string>
@@ -176,7 +176,7 @@ codesign --sign - --force --deep "$APP"
 echo "▶ [7/7] creating DMG"
 cp -R "$APP" "build/dmg-root/"
 ln -s /Applications "build/dmg-root/Applications"
-hdiutil create -volname "Trace Review" -srcfolder build/dmg-root -ov -format UDZO "$DMG" >/dev/null
+hdiutil create -volname "$APP_NAME" -srcfolder build/dmg-root -ov -format UDZO "$DMG" >/dev/null
 shasum -a 256 "$DMG" | tee "$DMG.sha256"
 
 echo "✓ Done: $DMG ($(du -h "$DMG" | cut -f1))"
